@@ -24,10 +24,7 @@ pip install pandas numpy matplotlib seaborn scikit-learn requests
 
 ## Requirements
 
-1. **Fork** this repository to your own GitHub account.
-2. **Clone** the fork to your local machine.
-3. Work in a single Jupyter Notebook called **`m4-05-assessment.ipynb`**.
-4. **Commit regularly** — your commit history should show incremental progress.
+Work in a single Jupyter Notebook called **`m4-05-assessment.ipynb`**.
 
 ## Tasks
 
@@ -110,18 +107,11 @@ Using the historical data from Task 2, build one or two quick models to test whe
 - [ ] Data quality issues are documented.
 - [ ] At least two models are trained and evaluated with a comparison table.
 - [ ] A feasibility verdict explains whether the idea works and what needs improvement.
-- [ ] Commit history shows incremental progress.
 - [ ] The notebook runs top-to-bottom without errors (`Kernel → Restart & Run All`).
 
-### How to submit (Git workflow)
+### How to submit
 
-```bash
-git add .
-git commit -m "assessment: pre-flight check — problem definition and baseline models"
-git push origin main
-```
-
-Then open a **Pull Request** on the original repository with a brief description of your work.
+Upload your completed `m4-05-assessment.ipynb` file in the Student Portal.
 
 ## Evaluation Criteria
 
@@ -130,4 +120,4 @@ Then open a **Pull Request** on the original repository with a brief description
 | Problem Definition | 50% | Clear, specific problem statement that goes beyond standard forecasts; well-chosen cities, variables, and prediction target |
 | Data Inspection | 20% | Both endpoints fetched and loaded correctly; summary stats reported; quality issues identified; at least one visualisation |
 | Baseline Models | 20% | At least two models trained with proper train/test split; appropriate metrics; honest feasibility assessment |
-| Communication & Code Quality | 10% | Clear markdown explanations at each step; clean code; notebook runs without errors; regular commits |
+| Communication & Code Quality | 10% | Clear markdown explanations at each step; clean code; notebook runs without errors |
