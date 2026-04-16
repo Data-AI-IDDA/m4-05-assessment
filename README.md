@@ -1,30 +1,25 @@
 ![logo_ironhack_blue 7](https://user-images.githubusercontent.com/23629340/40541063-a07a0a8a-601a-11e8-91b5-2f13e4e6b441.png)
 
-# Assessment | End-to-End Supervised Learning Pipeline
+# Assessment | Pre-Flight Check — Define Your Weather Prediction Problem
 
 ## Overview
 
-This assessment evaluates your ability to build a complete supervised learning pipeline from scratch. You'll take a real-world dataset through the full lifecycle: exploration, cleaning, feature engineering, model training, comparison, and final analysis. This is the kind of workflow you'll repeat in every data science project — the goal is to demonstrate that you can execute it independently and make informed decisions at each stage.
-
-You'll work with the Adult Income (Census) dataset, a widely-used benchmark for binary classification. The task is to predict whether an individual earns more than $50K per year based on demographic and employment features. The dataset has a realistic mix of challenges: missing values, categorical features, class imbalance, and features that require thoughtful engineering.
+This assessment is the launchpad for your mid-course project: **Weather Intelligence Pipeline — Can We Trust This Data?** Starting next week you will spend two weeks building an end-to-end pipeline that ingests weather data, evaluates its quality, and delivers a prediction that goes beyond a standard 7-day forecast. Today you define what that prediction will be, get your hands on the data, and build a first quick model to test whether your idea is feasible.
 
 ## Learning Goals
 
-This assessment evaluates your ability to:
-
-- Conduct thorough exploratory data analysis and handle real-world data quality issues.
-- Build a preprocessing pipeline using scikit-learn's `ColumnTransformer` and `Pipeline`.
-- Train, evaluate, and compare at least four supervised learning models.
-- Tune hyperparameters systematically and analyze feature importances.
-- Communicate findings clearly through code, visualizations, and written analysis.
+- Define a clear, scoped prediction problem grounded in real weather data.
+- Fetch and inspect data from the Open-Meteo historical and forecast APIs.
+- Apply the supervised learning skills from Unit 4.1 to build quick baseline models.
+- Evaluate whether the data and approach can support your chosen question.
 
 ## Prerequisites
 
 - Python 3.9+
-- Libraries: pandas, numpy, matplotlib, seaborn, scikit-learn
+- Libraries: pandas, numpy, matplotlib, seaborn, scikit-learn, requests
 
 ```bash
-pip install pandas numpy matplotlib seaborn scikit-learn
+pip install pandas numpy matplotlib seaborn scikit-learn requests
 ```
 
 ## Requirements
@@ -32,79 +27,74 @@ pip install pandas numpy matplotlib seaborn scikit-learn
 1. **Fork** this repository to your own GitHub account.
 2. **Clone** the fork to your local machine.
 3. Work in a single Jupyter Notebook called **`m4-05-assessment.ipynb`**.
-4. **Commit regularly** — your commit history should show incremental progress, not a single final commit.
+4. **Commit regularly** — your commit history should show incremental progress.
 
 ## Tasks
 
-### Task 1 — Data Exploration & Cleaning
+### Task 1 — Define Your Prediction Problem
 
-Load the Adult Income dataset and perform a thorough EDA.
+Discuss with your team and choose a research direction. Your prediction must go **beyond a standard weather forecast** — it should answer a question that a regular 7-day forecast does not.
 
-```python
-from sklearn.datasets import fetch_openml
-adult = fetch_openml("adult", version=2, as_frame=True)
-X, y = adult.data, adult.target
-```
+#### Suggested directions
 
-1. **Explore the dataset:** Report the shape, feature names, data types, and the first few rows. How many numerical vs. categorical features are there?
-2. **Target variable:** What are the classes? What is the class distribution? Is the dataset balanced?
-3. **Missing values:** Identify columns with missing values (some may be encoded as `"?"` or `NaN`). Report the count and percentage for each. Decide on a strategy for each column (drop rows or drop column) and justify your choices.
-4. **Distributions:** Create visualizations for at least 3 numerical features (histograms or box plots) and at least 3 categorical features (bar charts). Highlight any interesting patterns or outliers.
-5. **Bivariate analysis:** Explore relationships between key features and the target. For example: How does income vary by education level? By occupation? By hours worked per week?
-6. **Document your findings** in markdown cells. Write a summary paragraph at the end of Task 1 describing the dataset's key characteristics and any concerns for modeling.
+| Direction | Example questions |
+|-----------|-------------------|
+| **Long-term statistical prediction** | Will May be rainier than the climate norm? Will the majority of July days be above 35 °C? What is the probability that average summer temperature exceeds the 10-year mean? Report results with **confidence intervals** or **probabilities** — think **monthly or seasonal** questions, not next-Tuesday questions. |
+| **Spatial refinement** | Take an existing city-scale 7-day forecast and refine it for a **specific location** — a rural area, a particular agricultural field, your neighbourhood — using interpolation, elevation adjustments, or local correction factors. |
 
-### Task 2 — Feature Engineering & Preprocessing
+Your team may also propose a different direction, as long as it goes beyond what a standard forecast already provides.
 
-Build a robust preprocessing pipeline.
+In a markdown cell, write:
 
-1. **Separate features by type:** Identify which columns are numerical and which are categorical.
-2. **Numerical preprocessing:** Create a pipeline that scales features (`StandardScaler`).
-3. **Categorical preprocessing:** Create a pipeline that encodes features (`OneHotEncoder` with `handle_unknown="ignore"`).
-4. **Combine with ColumnTransformer:** Build a single `ColumnTransformer` that applies the appropriate pipeline to each feature type.
-5. **Full pipeline:** Wrap the `ColumnTransformer` and a classifier into a scikit-learn `Pipeline`. Demonstrate that it works by fitting and predicting with a simple model (e.g., `LogisticRegression`).
-6. **Train/test split:** Split the data (80/20, `stratify=y`, `random_state=42`). All preprocessing must be fit on training data only.
+1. **Problem statement** — One or two sentences describing the question you will answer.
+2. **Why it matters** — Who would use this prediction and for what? (e.g., a tea farmer in Lankaran planning irrigation, an energy company forecasting summer demand.)
+3. **Prediction target** — What exactly will your model predict? (e.g., "Monthly average temperature for June 2025 in Baku", "Daily precipitation probability for a specific rural coordinate".)
+4. **Cities / locations** — List at least 3 cities (coordinates) you plan to use. At least one should be in Azerbaijan.
+5. **Weather variables** — List at least 6 daily variables you will fetch (e.g., `temperature_2m_max`, `precipitation_sum`, `windspeed_10m_max`).
 
-In a markdown cell, explain why using a `Pipeline` prevents data leakage and why this matters.
+### Task 2 — Initial Data Inspection
 
-### Task 3 — Model Training & Comparison
+Fetch sample data from both Open-Meteo endpoints and load it into pandas DataFrames.
 
-Train at least four different models and compare their performance.
+**No API key is needed.** Open-Meteo is free and open.
 
-1. Using your preprocessing pipeline from Task 2, train the following models:
-   - `LogisticRegression(max_iter=1000)`
-   - `SVC(probability=True)`
-   - `RandomForestClassifier(random_state=42)`
-   - `GradientBoostingClassifier(random_state=42)`
+1. **Historical data.** For one of your chosen cities, fetch at least 2 full years of daily data from the archive endpoint. Load the JSON response into a DataFrame. Report: shape, column names, data types, date range, and a quick check for missing values.
 
-2. For each model, evaluate on the test set using:
-   - Accuracy
-   - Precision (weighted)
-   - Recall (weighted)
-   - F1 score (weighted)
+   ```
+   https://archive-api.open-meteo.com/v1/archive?latitude=40.41&longitude=49.87&start_date=2022-01-01&end_date=2024-12-31&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max
+   ```
 
-3. Create a **comparison table** (DataFrame) with all models and metrics. Sort by F1 score.
-4. Plot **ROC curves** for all four models on a single figure with AUC values in the legend.
-5. Plot the **confusion matrix** for each model.
-6. In a markdown cell, discuss: Which model performs best? Are there meaningful differences between the models? Which metric is most important for this problem (predicting income) and why?
+2. **Forecast data.** For the same city, fetch the current 7-day forecast from the forecast endpoint. Load it into a DataFrame. Report the same summary.
 
-### Task 4 — Best Model Analysis
+   ```
+   https://api.open-meteo.com/v1/forecast?latitude=40.41&longitude=49.87&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max
+   ```
 
-Deep-dive into your best model.
+3. **Quick visualisation.** Plot at least one time-series chart from the historical data (e.g., daily max temperature over 2 years) and note any visible gaps, outliers, or seasonal patterns.
 
-1. Select the best-performing model from Task 3.
-2. **Hyperparameter tuning:** Use `GridSearchCV` or `RandomizedSearchCV` with at least 3 hyperparameters. Use 5-fold cross-validation with `scoring="f1_weighted"`.
-3. Report the **best parameters** and the improvement in cross-validation score over the default model.
-4. Evaluate the tuned model on the test set. Create a detailed `classification_report`.
-5. **Feature importance analysis:**
-   - If your best model supports `feature_importances_` (tree-based), plot the top 15 most important features.
-   - If not (e.g., SVM), use permutation importance from scikit-learn.
-   - Which features are most predictive of high income? Do the results align with your EDA findings?
-6. **Executive summary:** Write a 200–300 word markdown cell summarizing your entire analysis. Include:
-   - The problem and dataset
-   - Key preprocessing decisions
-   - Which model you recommend and why
-   - The most important predictive features
-   - Limitations and potential next steps
+4. **Data quality notes.** In a markdown cell, list any issues you noticed (missing rows, suspicious values, gaps) and how they might affect your project.
+
+### Task 3 — Baseline Model Experiment
+
+Using the historical data from Task 2, build one or two quick models to test whether your prediction idea is feasible. Apply the supervised learning workflow from Unit 4.1.
+
+1. **Create a simple target variable** related to your problem statement. For example:
+   - Binary: "Was this day above the monthly climate average?" (classification)
+   - Continuous: "Next-day maximum temperature" (regression)
+   - Choose whatever makes sense for your direction — this is an experiment, not a final model.
+
+2. **Feature engineering (minimal).** Create at least 2–3 simple features from the raw data (e.g., rolling averages, month indicator, lag features).
+
+3. **Train at least two models.** Use a train/test split (`random_state=42`). Suggested models:
+   - `LogisticRegression` or `LinearRegression` (depending on your target)
+   - `RandomForestClassifier` or `RandomForestRegressor`
+
+4. **Evaluate.** Report appropriate metrics (accuracy/F1 for classification, RMSE/R² for regression). Create a short comparison table.
+
+5. **Feasibility verdict.** In a markdown cell, answer:
+   - Do the results suggest your prediction idea is feasible?
+   - What would you need to improve in the full project? (more data, more features, better cleaning, different model?)
+   - Any changes to your problem statement based on what you learned?
 
 ## Submission
 
@@ -114,13 +104,12 @@ Deep-dive into your best model.
 
 ### Definition of done (checklist)
 
-- [ ] Dataset is loaded, explored, and cleaned with documented decisions.
-- [ ] A scikit-learn Pipeline with ColumnTransformer handles all preprocessing.
-- [ ] At least 4 models are trained and compared with a metrics table.
-- [ ] ROC curves and confusion matrices are plotted for all models.
-- [ ] Best model is tuned with GridSearchCV/RandomizedSearchCV.
-- [ ] Feature importances are analyzed and visualized.
-- [ ] An executive summary ties the analysis together.
+- [ ] Problem statement is clearly written with prediction target, cities, and variables.
+- [ ] Historical and forecast data are fetched and loaded into DataFrames with summary stats.
+- [ ] At least one visualisation of the historical data.
+- [ ] Data quality issues are documented.
+- [ ] At least two models are trained and evaluated with a comparison table.
+- [ ] A feasibility verdict explains whether the idea works and what needs improvement.
 - [ ] Commit history shows incremental progress.
 - [ ] The notebook runs top-to-bottom without errors (`Kernel → Restart & Run All`).
 
@@ -128,7 +117,7 @@ Deep-dive into your best model.
 
 ```bash
 git add .
-git commit -m "assessment: complete end-to-end supervised learning pipeline"
+git commit -m "assessment: pre-flight check — problem definition and baseline models"
 git push origin main
 ```
 
@@ -138,8 +127,7 @@ Then open a **Pull Request** on the original repository with a brief description
 
 | Criterion | Weight | Description |
 |---|---|---|
-| Data Exploration & Cleaning | 20% | Thoroughness of EDA, quality of visualizations, justified handling of missing values |
-| Feature Engineering & Pipeline | 20% | Correct use of ColumnTransformer and Pipeline, no data leakage, clear code |
-| Model Training & Comparison | 25% | At least 4 models trained, proper evaluation metrics, clear comparison table and plots |
-| Best Model Analysis | 25% | Systematic hyperparameter tuning, feature importance analysis, quality of executive summary |
-| Code Quality & Communication | 10% | Clean code, clear markdown explanations, notebook runs without errors, regular commits |
+| Problem Definition | 50% | Clear, specific problem statement that goes beyond standard forecasts; well-chosen cities, variables, and prediction target |
+| Data Inspection | 20% | Both endpoints fetched and loaded correctly; summary stats reported; quality issues identified; at least one visualisation |
+| Baseline Models | 20% | At least two models trained with proper train/test split; appropriate metrics; honest feasibility assessment |
+| Communication & Code Quality | 10% | Clear markdown explanations at each step; clean code; notebook runs without errors; regular commits |
